@@ -13,6 +13,7 @@ To install the repository and build the SARA project packages, follow these step
      git clone https://github.com/Jomo178/sara.git
      cd sara
      ```
+     
 ## Building Packages
 
 3. **Build the drive package:**
