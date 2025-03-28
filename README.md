@@ -5,30 +5,22 @@
 
 To install the repository and build the SARA project packages, follow these steps:
 
-1. **Install ROS 2 Jazzy:**
-    Follow the installation instructions provided [here](https://docs.ros.org/en/jazzy/Installation.html).
+1. **Install ROS 2 Foxy:**
+     Follow the installation instructions provided [here](https://docs.ros.org/en/foxy/Installation.html).
 
 2. **Clone the repository:**
-     ```bash
-     git clone https://github.com/Jomo178/sara.git
-     cd sara
-     ```
-     
+      ```bash
+      git clone https://github.com/Jomo178/sara.git
+      cd sara
+      ```
+
+3. **Install ldrobot-lidar-ros2:**
+      We use the DToF 2D Lidar sensor [LD19](https://www.waveshare.com/wiki/DTOF_LIDAR_LD19) for this project. Therefore, the scan listener package based on the [ldrobot-lidar-ros2](https://github.com/ldrobotSensorTeam/ldrobot-lidar-ros2) repository must be installed and built.
+
 ## Building Packages
 
-3. **Build the drive package:**
-     ```bash
-     cd drive
-     pip install .
-     ```
-
-4. **Build the scan listener package:**
-    We use the DToF 2D Lidar sensor [LD19](https://www.waveshare.com/wiki/DTOF_LIDAR_LD19) for this project, and therefore the scan listener repository is required. It is already included in the project. The scan listener package is based on the [ldrobot-lidar-ros2](https://github.com/Myzhar/ldrobot-lidar-ros2) repository. You just need to build it:
-     ```bash
-     cd ../ldrobot-lidar-ros2
-     colcon build
-     ```
-     
-## License
-
-This project includes software from the [Myzhar/ldrobot-lidar-ros2](https://github.com/Myzhar/ldrobot-lidar-ros2) repository, which is licensed under the LICENSE file provided in that repository. Please refer to the [LICENSE](https://github.com/Myzhar/ldrobot-lidar-ros2/blob/devel/LICENSE) for more details.
+4. **Build the drive package:**
+      ```bash
+      cd drive
+      pip install .
+      ``` 

@@ -1,0 +1,28 @@
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: false
+    slam_mode: true
+    map_file_name: map
+    resolution: 0.05
+    publish_period_sec: 1.0
+    map_update_interval: 0.5
+    num_laser_scans: 1
+    num_multi_echo_laser_scans: 0
+    num_subdivisions_per_laser_scan: 1
+    num_point_clouds: 0
+    transform_publish_period: 0.05
+    tf_publication_timeout: 0.0
+    tf_buffer_duration: 10.0
+    map_frame: map
+    tracking_frame: base_link
+    use_scan_matching: true
+    use_loop_closing: true
+    scan_topic: /scan
+    odom_frame: odom
+    provide_odom_frame: true
+    use_odometry: true
+    base_frame: base_link
+    publish_to_tf: true
+    publish_tracked_pose: true
+    use_pose_graph: true
+    use_nav2: false
