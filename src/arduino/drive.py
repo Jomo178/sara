@@ -1,44 +1,99 @@
 import serial
 import time
-import keyboard
 
-#ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)    
-#ser.reset_input_buffer()
+'''def find_arduino_port():
+    """Find the Arduino serial port by trying common options."""
+    possible_ports = ['/dev/ttyUSB0', '/dev/ttyUSB1', '/dev/ttyACM0', '/dev/ttyACM1']
+    for port in possible_ports:
+        try:
+            test_ser = serial.Serial(port, 9600, timeout=1)
+            test_ser.close()
+            return port
+        except (serial.SerialException, OSError):
+            continue
+    raise serial.SerialException("Could not find Arduino on any common port")
 
-motor_servo_vals = [511, 511] 
-key_states = {'w': False, 's': False, 'a': False, 'd': False}
+arduino_port = find_arduino_port()'''
+# print(f"Connected to Arduino on {arduino_port}")
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+ser.reset_input_buffer()
 
-def update_values():
-    global motor_servo_vals 
-    if key_states['w']:
-        motor_servo_vals[0] = 600
-    elif key_states['s']:
-        motor_servo_vals[0] = 600
+motor_servo_vals = [90, 90] 
+last_sent_vals = [90, 90]  # Track the last values sent
+
+def getch():
+    import sys, termios, tty
+
+    fd = sys.stdin.fileno()
+    orig = termios.tcgetattr(fd)
+
+    try:
+        tty.setcbreak(fd)  # or tty.setraw(fd) if you prefer raw mode's behavior.
+        return sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSAFLUSH, orig)
+
+
+#servo max: 120 d; 60 a;
+def movementIsValid(value, operation):
+
+    if value + operation >= 60 and value + operation <= 120:
+        return True
     else:
-        motor_servo_vals[0] = 511
- 
-    if key_states['a']:
-        motor_servo_vals[1] = 400
-    elif key_states['d']:
-        motor_servo_vals[1] = 600
-    else:
-        motor_servo_vals[1] = 511
+        return False
+
+def update_values(key):
+    global motor_servo_vals, last_sent_vals
     
-    #print(motor_servo_vals)
-    #ser.write(bytearray(motor_servo_vals))
-    #line = ser.readline().decode('latin-1').rstrip()
 
-def on_key_event(event):
-    global key_states
-    if event.name in key_states:
-        print(key_states)
-        if event.event_type == keyboard.KEY_DOWN:
-            key_states[event.name] = True
-        elif event.event_type == keyboard.KEY_UP:
-            key_states[event.name] = False
-        update_values()
+    
+    # Calculate new values based on key input
+    if key == 'w':
+        if movementIsValid(motor_servo_vals[0],2):
+            motor_servo_vals[0] = motor_servo_vals[0] + 2
+    elif key == 's':
+        if movementIsValid(motor_servo_vals[0], -2):
+            motor_servo_vals[0] = motor_servo_vals[0] - 2
+    elif key == 'q':
+        motor_servo_vals[0] = 90
+    #else:
+    #    motor_servo_vals[0] = 90
+        
+    if key == 'a':
+        if movementIsValid(motor_servo_vals[1], -10):
+            motor_servo_vals[1] = motor_servo_vals[1] - 10
+    elif key == 'd':
+        if movementIsValid(motor_servo_vals[1], 10):
+            motor_servo_vals[1] = motor_servo_vals[1] + 10
+    elif key == 'e':
+        motor_servo_vals[1] = 90
+    #else:
+    #    motor_servo_vals[1] = 90
+    
+    # Only send if values have changed
+    if motor_servo_vals != last_sent_vals:
+        ser.write(bytearray(motor_servo_vals))
+        print("Sent:", motor_servo_vals)
+        last_sent_vals = motor_servo_vals.copy()  # Update the last sent values
 
-keyboard.hook(on_key_event)
+print("Press 'w' (forward), 's' (backward), 'a' (left), 'd' (right), 'q' (reset throttle), e' (reset steer)")
+print("Press 'f' to exit.")
 
-print("Press 'wsad' keys to track. Press 'esc' to exit.")
-keyboard.wait('esc')
+try:
+    while True:
+        key = getch()
+        #print()
+        if key.lower() == 'f':
+            break
+        if key.lower() in ['w', 's', 'a', 'd', 'e', 'q']:
+            update_values(key.lower())
+        else:
+            print("Invalid command. Use w/s/a/d to control, q to quit.")
+            
+except KeyboardInterrupt:
+    pass
+finally:
+    # Reset to neutral before exiting
+    ser.write(bytearray([90, 90]))
+    print("Exiting and resetting to neutral position")
+

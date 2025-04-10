@@ -1,10 +1,10 @@
 import serial
 import time
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
     ser.reset_input_buffer()
     while True:
-        motor_servo_vals = [90, 255] #MOTOR, SERVO
+        motor_servo_vals = [90, 80] #MOTOR, SERVO
         ser.write(bytearray(motor_servo_vals))
         line = ser.readline().decode('latin-1').rstrip() #READ DATA
         print(line)
