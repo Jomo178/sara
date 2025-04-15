@@ -10,7 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/params', ['params/mapper_params_online_async.yaml']),  # Add this line
+        ('share/' + package_name + '/params', ['params/mapper_params_online_async.yaml', 'params/lifecycle_mgr_slam.yaml']),  # Add this line
     ],
     install_requires=['setuptools'],
     zip_safe=True,

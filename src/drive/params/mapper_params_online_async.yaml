@@ -17,11 +17,11 @@ slam_toolbox:
     tracking_frame: base_link
     use_scan_matching: true
     use_loop_closing: true
-    scan_topic: /scan
+    scan_topic: /ldlidar_node/scan #github
     odom_frame: odom
     provide_odom_frame: true
     use_odometry: true
-    base_frame: base_link
+    base_frame: ldlidar_base #github 
     publish_to_tf: true
     publish_tracked_pose: true
     use_pose_graph: true

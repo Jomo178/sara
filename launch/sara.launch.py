@@ -11,7 +11,7 @@ def generate_launch_description():
 
     # Lifecycle manager configuration file
     lc_mgr_config_path = os.path.join(
-        get_package_share_directory('ldlidar_node'),
+        get_package_share_directory('drive'),
         'params',
         'lifecycle_mgr_slam.yaml'
     )
@@ -72,7 +72,9 @@ def generate_launch_description():
           output='screen',
           parameters=[
             # YAML files
-            slam_config_path # Parameters
+            slam_config_path, # Parameters
+            {'use_sim_time': False}, 
+            {'scan_topic': '/ldlidar_node/scan'}, # Topic remapping 
           ],
           remappings=[
               ('/scan', '/ldlidar_node/scan')

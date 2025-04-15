@@ -1,0 +1,10 @@
+# config/lifecycle_mgr.yaml
+#
+# Example configuration file to automatically handle the ldlidar lifecycle node
+lifecycle_manager:
+  ros__parameters:
+    autostart: True
+    node_names: ['ldlidar_node', 'slam_toolbox']
+    bond_timeout: 5.0
+    attempt_respawn_reconnection: true
+    bond_respawn_max_duration: 10.0
