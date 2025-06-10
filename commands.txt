@@ -51,30 +51,3 @@ source install/local_setup.bash
 
 ros2 run drive drive_node
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
-
-
-<?xml version="1.0"?>
-
-<robot name="ldlidar">
-
-    <link name="ldlidar_base">
-        <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-            <geometry>
-                <mesh filename="package://ldlidar_node/urdf/model/LD19.stl" scale="0.001 0.001 0.001" />
-            </geometry>
-            <material name="ldlidar_mat">
-                <color rgba="0.8 0.8 0.8 0.8"/>
-            </material>
-        </visual> 
-    </link>
-
-    <joint name="ldlidar_link_joint" type="fixed">
-        <parent link="ldlidar_base"/>
-        <child link="ldlidar_link"/>
-        <origin xyz="-0.17 0 0.13" rpy="0 0 0" />
-    </joint>
-
-    <link name="ldlidar_link" />
-
-</robot>
