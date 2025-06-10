@@ -11,6 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/params', ['params/mapper_params_online_async.yaml', 'params/lifecycle_mgr_slam.yaml']),  # Add this line
+        ('share/' + package_name + '/launch', ['launch/sara_launch.py']), 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'scan_listener = drive.scan_listener:main',
-        ],
+            'drive_node = drive.drive_node:main',
+        ],  
     },
 )
