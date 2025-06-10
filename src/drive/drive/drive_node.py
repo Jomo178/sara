@@ -38,64 +38,70 @@ class SerialDriveNode(Node):
 
         self.timer = self.create_timer(0.05, self.update_output)
         
-        self.get_logger().info(f"Drive node initialized with wheelbase: {self.wheelbase}m")
+        self.get_logger().info(f"Drive node initialized with wheelbase: {self.wheelbase}m, max_steering: {self.max_steering_angle}rad")
 
     def convert_trans_rot_vel_to_steering_angle(self, v, omega):
         """Convert linear and angular velocity to steering angle using Ackermann model"""
-        if omega == 0 or v == 0:
-            return 0
+        if abs(omega) < 0.001 or abs(v) < 0.001:
+            return 0.0
         
+        # Calculate turning radius
         radius = v / omega
-        return math.atan(self.wheelbase / radius)
+        
+        # Calculate steering angle using Ackermann geometry
+        steering_angle = math.atan(self.wheelbase / radius)
+        
+        # Clamp to maximum steering angle
+        steering_angle = max(-self.max_steering_angle, min(self.max_steering_angle, steering_angle))
+        
+        return steering_angle
 
     def listener_callback(self, msg: Twist):
-        throttle = msg.linear.x
+        linear_vel = msg.linear.x
         angular_vel = msg.angular.z
 
-        # Drive at constant speed (108) when there's any movement command
-        if abs(throttle) > 0.01 or abs(angular_vel) > 0.01:
-            self.target_vals[0] = 108  # Constant speed
+        # Motor control - map linear velocity to motor values
+        # Your car starts driving at 106, limiting to 108 for testing
+        if abs(linear_vel) > 0.01:
+            if linear_vel > 0:
+                # Forward motion: 106-108 range (limited for testing)
+                motor_range = 2  # 108-106
+                motor_offset = (linear_vel / self.max_speed) * motor_range
+                motor_offset = max(0, min(motor_range, motor_offset))  # Clamp to positive
+                self.target_vals[0] = int(106 + motor_offset)
+            else:
+                # Reverse motion: 88-86 range (symmetric around 90, limited for testing)
+                motor_range = 2  # 88-86
+                motor_offset = (-linear_vel / self.max_speed) * motor_range
+                motor_offset = max(0, min(motor_range, motor_offset))  # Clamp to positive
+                self.target_vals[0] = int(88 - motor_offset)
         else:
-            self.target_vals[0] = 90  # Stop when no command
+            self.target_vals[0] = 90  # Stop
 
-        # Handle steering
-        if abs(angular_vel) > 0.01 and abs(throttle) > 0.01:
-            # Standard case: both speed and angular velocity provided
-            steering_angle = self.convert_trans_rot_vel_to_steering_angle(throttle, angular_vel)
-            # Clamp steering angle to maximum
-            steering_angle = max(-self.max_steering_angle, min(self.max_steering_angle, steering_angle))
+        # Steering control using proper Ackermann conversion
+        if abs(linear_vel) > 0.01 or abs(angular_vel) > 0.01:
+            if abs(angular_vel) > 0.01 and abs(linear_vel) > 0.01:
+                # Normal case: both linear and angular velocity provided
+                steering_angle = self.convert_trans_rot_vel_to_steering_angle(linear_vel, angular_vel)
+            elif abs(angular_vel) > 0.01:
+                # Pure rotation - use maximum steering angle
+                steering_angle = self.max_steering_angle if angular_vel > 0 else -self.max_steering_angle
+            else:
+                # Pure linear motion - straight ahead
+                steering_angle = 0.0
+            
             # Convert steering angle to servo value (60-120, with 90 as center)
-            angle_ratio = steering_angle / self.max_steering_angle
-            servo_val = int(90 - (angle_ratio * 30))  # Note: negative for correct direction
+            # Negative sign to match your car's steering direction
+            angle_ratio = -steering_angle / self.max_steering_angle
+            servo_val = int(90 + (angle_ratio * 30))
             servo_val = max(60, min(120, servo_val))
             self.target_vals[1] = servo_val
-        elif abs(throttle) > 0.4:  # Speed threshold for turning
-            # High speed values indicate turning commands
-            if throttle > 0.8:  # Turn right when speed > 0.8
-                servo_val = 60  # Full right turn
-                self.target_vals[1] = servo_val
-                self.get_logger().info(f"Right turn: speed={throttle:.2f}")
-            elif throttle < -0.8:  # Turn left when speed < -0.8
-                servo_val = 120  # Full left turn
-                self.target_vals[1] = servo_val
-                self.get_logger().info(f"Left turn: speed={throttle:.2f}")
-            elif throttle > 0.4:  # Moderate right turn
-                servo_val = 75  # Moderate right
-                self.target_vals[1] = servo_val
-                self.get_logger().info(f"Moderate right: speed={throttle:.2f}")
-            elif throttle < -0.4:  # Moderate left turn
-                servo_val = 105  # Moderate left
-                self.target_vals[1] = servo_val
-                self.get_logger().info(f"Moderate left: speed={throttle:.2f}")
-        elif abs(throttle) > 0.01 and abs(angular_vel) <= 0.01:
-            # Low speed: straight driving
-            self.target_vals[1] = 90  # Center steering for straight driving
-            self.get_logger().debug(f"Straight driving: speed={throttle:.2f}")
         else:
-            # No movement
-            self.target_vals[1] = 90  # Center steering
+            # No movement - center steering
+            self.target_vals[1] = 90
 
-        self.get_logger().debug(f"Cmd: speed={throttle:.2f}, angular={angular_vel:.2f} -> motor={self.target_vals[0]}, servo={self.target_vals[1]}")
+        # Use info level logging so you can see the data being sent
+        self.get_logger().info(f"Cmd: v={linear_vel:.3f}, ω={angular_vel:.3f} -> motor={self.target_vals[0]}, servo={self.target_vals[1]}")
 
     def update_output(self):
         updated = False
@@ -111,7 +117,8 @@ class SerialDriveNode(Node):
         if updated:
             try:
                 self.ser.write(bytearray(self.current_vals))
-                self.get_logger().info(f"Sent: {self.current_vals}")
+                # Use info level logging to see actual data being sent to car
+                self.get_logger().info(f"Sent to car: motor={self.current_vals[0]}, servo={self.current_vals[1]}")
             except serial.SerialException as e:
                 self.get_logger().error(f"Serial write failed: {e}")
 
