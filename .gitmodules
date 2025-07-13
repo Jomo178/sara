@@ -1,3 +1,6 @@
 [submodule "src/ldrobot-lidar-ros2"]
 	path = src/ldrobot-lidar-ros2
 	url = https://github.com/Myzhar/ldrobot-lidar-ros2.git
+[submodule "src/rf2o_laser_odometry"]
+	path = src/rf2o_laser_odometry
+	url = https://github.com/Jomo178/rf2o_laser_odometry.git
