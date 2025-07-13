@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/params', ['params/mapper_params_online_async.yaml', 'params/lifecycle_mgr_slam.yaml', 'params/nav2_params.yaml', 'params/rviz2.yaml']),  # Add this line
-        ('share/' + package_name + '/launch', ['launch/sara_launch.py']), 
+        ('share/' + package_name + '/launch', ['launch/sara_launch.py', 'launch/drive_launch.py']), 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -28,3 +28,4 @@ setup(
         ],  
     },
 )
+('share/' + package_name + '/launch', ['launch/sara_launch.py', 'launch/drive_launch.py']), 

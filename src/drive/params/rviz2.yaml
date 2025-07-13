@@ -575,9 +575,9 @@ Visualization Manager:
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
     - Class: rviz_default_plugins/SetInitialPose
-      Covariance x: 0.25
-      Covariance y: 0.25
-      Covariance yaw: 0.06853891909122467
+      Covariance x: 0
+      Covariance y: 0
+      Covariance yaw: 0
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -612,7 +612,7 @@ Visualization Manager:
       Scale: 54
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
-      X: -5.409999847412109
+      X: 0
       Y: 0
     Saved: ~
 Window Geometry:
@@ -636,6 +636,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1610
-  X: 1091
-  Y: 222
+  Width: 1300
+  X: 0
+  Y: 0

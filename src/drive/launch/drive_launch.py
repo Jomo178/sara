@@ -16,19 +16,12 @@ def generate_launch_description():
         'lifecycle_mgr.yaml'
     )
 
-    # Declare map argument with default path to your map
-    declare_map_yaml_cmd = DeclareLaunchArgument(
-        'map', 
-        default_value=os.path.join('/home/sara/sara', 'raum.yaml'),
-        description='Full path to map yaml file to load'
-    )
-
     # Static transform from base_link to ldlidar_base
     base_to_lidar_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_ldlidar_tf',
-        arguments=['-0.17', '0', '0.13', '0', '0', '0', 'base_link', 'ldlidar_base'],
+        arguments=['-0.08', '0', '0', '0', '0', '0', 'base_link', 'ldlidar_base'],
     )
 
     # Lifecycle manager node
@@ -72,8 +65,8 @@ def generate_launch_description():
     )
 
     # Get the launch directory
-    bringup_dir = get_package_share_directory('nav2_bringup')
-    launch_dir = os.path.join(bringup_dir, 'launch')
+    navigation_launch_dir = get_package_share_directory('nav2_bringup')
+    launch_dir = os.path.join(navigation_launch_dir, 'launch')
     nav2_params_file = os.path.join(
         #get_package_share_directory('drive'),
         '/home/sara/sara/src/drive',
@@ -81,12 +74,12 @@ def generate_launch_description():
         'nav2_params.yaml'
     )
 
-    bringup_launch = IncludeLaunchDescription(
-        launch_description_source=PythonLaunchDescriptionSource(os.path.join(launch_dir, 'bringup_launch.py')),
+    navigation_launch = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource(os.path.join(navigation_launch_dir, 'launch', 'navigation_launch.py')),
         launch_arguments={
-            'params_file': nav2_params_file,
-            'map': LaunchConfiguration('map'),
-            'use_sim_time': 'False'
+            'params_file': nav2_params_file, 
+            'use_sim_time': 'False',
+            'autostart': 'True'
         }.items()
     )
 
@@ -106,11 +99,28 @@ def generate_launch_description():
         parameters=[{'use_sim_time': False}]
     )
 
+    # SLAM Toolbox launch
+    slam_params_file = os.path.join(
+        '/home/sara/sara/src/drive',
+        'params',
+        'mapper_params_online_async.yaml'
+    )
+
+    slam_launch = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource([
+            get_package_share_directory('slam_toolbox'),
+            '/launch/online_async_launch.py'
+        ]),
+        launch_arguments={
+            'slam_params_file': slam_params_file,
+            'use_sim_time': 'False',
+            'scan_topic': '/ldlidar_node/scan'
+        }.items()
+    )
+
     # Define LaunchDescription variable
     ld = LaunchDescription()
 
-    # Add map argument declaration
-    ld.add_action(declare_map_yaml_cmd)
 
     # static transform publisher from base_link to ldlidar_base
     ld.add_action(base_to_lidar_tf)
@@ -124,8 +134,11 @@ def generate_launch_description():
     # Call RF2O Laser Odometry launch
     ld.add_action(rf20_laser_launch_odometry)
 
-    # Add Nav2 bringup launch
-    ld.add_action(bringup_launch)
+    # Add SLAM Toolbox launch (provides map->odom transform)
+    ld.add_action(slam_launch)
+
+    # Add Nav2 bringup launch (needs map from SLAM)
+    ld.add_action(navigation_launch)
 
     # Add RViz2 node
     ld.add_action(rviz_node)
