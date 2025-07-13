@@ -1,55 +1,25 @@
-//start a saved map for localization
-
-1. ros2 launch nav2_bringup localization_launch.py \
-    map:=testing.yaml \
-    use_sim_time:=false \
-    scan_topic:=/ldlidar_node/scan
-
-2. ros2 run rviz2 rviz2
-
-//set a fake tf tree. Manu needs to calc the position
-                                            x y z Xr Yr Zr
-ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 odom base_link
-ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 base_link ldlidar_base
-
 //start lidar nodes
 ros2 launch ldlidar_node ldlidar_bringup.launch.py
 ros2 lifecycle set /ldlidar_node configure / activate 
-ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
 
-
-ros2 launch nav2_bringup localization_launch.py   map:=room.yaml   params_file:=nav2_params.yaml   use_sim_time:=false
-ros2 run robot_state_publisher robot_state_publisher src/drive/params/ackermann_bot.urdf 
 ros2 launch rf2o_laser_odometry rf2o_laser_odometry.launch.py
 
-ros2 run rviz2 rviz2 -d $(ros2 pkg prefix nav2_bringup)/share/nav2_bringup/rviz/nav2_default_view.rviz
+ros2 run tf2_ros static_transform_publisher -0.08 0.0 0 0 0 0 base_link ldlidar_base
 
-ros2 run tf2_ros static_transform_publisher 0.1 0.0 0.15 0 0 0 base_link ldlidar_base
+ros2 launch nav2_bringup bringup_launch.py   map:=room.yaml   params_file:=/src/drive/params/nav2_params.yaml   use_sim_time:=False 
 
-ros2 launch nav2_bringup bringup_launch.py   map:=room.yaml   params_file:=nav2_params.yaml   use_sim_time:=False 
-ros2 lifecycle get /global_costmap/global_costmap
-ros2 lifecycle set /global_costmap/global_costmap activate
-
-
-
-
-working:
-
-ros2 run rviz2 rviz2 -d src/drive/params/rviz.yaml
-ros2 launch nav2_bringup bringup_launch.py   map:=room.yaml   params_file:=s.yaml   use_sim_time:=False 
-ros2 launch rf2o_laser_odometry rf2o_laser_odometry.launch.py
-ros2 run tf2_ros static_transform_publisher -8 0.0 0 0 0 0 base_link ldlidar_base
-ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
-
-tf:
-x to lidar = 17 cm
-z to lidar = 13cm 
-
+ros2 run rviz2 rviz2 -d src/drive/params/rviz2.yaml  
 
 colcon build --packages-select drive
 source install/local_setup.bash
 
-ros2 run drive drive_node
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0}}"
+
+ros2 run drive drive_node 
+
+ros2 launch nav2_bringup navigation_launch.py params_file:=src/drive/params/nav2_params.yaml   use_sim_time:=False 
+
+ros2 launch slam_toolbox online_async_launch.py slam_params_file:=src/drive/params/mapper_params_online_async.yaml use_sim_time:=False scan_topic:=/ldlidar_node/scan
+
