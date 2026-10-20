@@ -1,28 +1,30 @@
-# Semi-Autonomous Racing Automobile (SARA)
-**Project Goal:** Develop a semi-autonomous racing automobile as part of a school project.
+# SARA — Semi-Autonomous Racing Automobile
 
-## Installation and Build Instructions
+SARA was a group project developed during my Abitur in 2025.
+Our goal was to build a semi-autonomous RC car and explore
+vehicle control, environmental sensing, mapping and navigation.
 
-To install the repository and build the SARA project packages, follow these steps:
+## Hardware and Software
 
-1. **Install ROS 2 Foxy:**
-     Follow the installation instructions provided [here](https://docs.ros.org/en/foxy/Installation.html).
+The project combined a Raspberry Pi 5, an Arduino Mega 2560,
+LiDAR and ultrasonic sensors with a motor and steering servo.
 
-2. **Clone the repository:**
-      ```bash
-      git clone --recurse-submodules https://github.com/Jomo178/sara.git
-      cd sara
-      ```
+The software used ROS 2, Python and Arduino/C++, with components
+for serial communication, vehicle control, laser odometry,
+SLAM mapping and Nav2 navigation.
 
-## Building Packages
+## About This Repository
 
-4. **Build the drive package:**
-      ```bash
-      colcon build
-      ``` 
+This repository preserves the code and configuration from the
+original school project. It was written for our specific hardware
+and is not intended as a ready-to-run setup for other vehicles.
 
-## Launch the SARA
-      ```bash
-      ros2 run drive drive_node 
-      ros2 launch drive drive_launch.py
-      ``` 
+I am building on this experience through [SARA-2](https://github.com/Jomo178/SARA-2) to deepen my
+knowledge of robotics and autonomous driving.
+
+## Documentation
+
+The original project report covers the system design,
+development process and technical challenges:
+
+[Read the project documentation](Dokumentation-SARA.pdf) (German)
